@@ -16,6 +16,9 @@
 • Translation Module
 • Voice Assistance
 
+
+
+
 **Problem Statement 2** : Smart Civic Issue Reporting and Resolution System using AI-Based Image Classification, Geo-Tagging.
 
 **Base Paper** : Deep Learning Based Pothole Detection and Reporting System.
