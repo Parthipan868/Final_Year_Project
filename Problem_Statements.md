@@ -36,3 +36,29 @@
 
 
 
+
+**Problem Statement 3** : AI-Powered Multi-Stage Dyslexia Screening and Severity Assessment System
+
+**Base Papers :**
+
+* Dyslexia Analysis and Diagnosis Based on Eye Movement
+* Multi-Modal Dyslexia Detection Model via SWIN Transformer With Closed-Form Continuous Time Networks
+
+**Limitations :**
+
+* No multi-stage screening framework
+* Mostly binary outputs (Dyslexic / Non-Dyslexic)
+* No dyslexia severity assessment
+* Over-reliance on MRI, fMRI, and EEG (expensive & unaccessible) at early stage 
+* Existing game-based assessments may be affected by non-dyslexia factors such as attention span, distraction and user engagement
+* Limited real-world school-level deployment
+
+**Proposed Solutions :**
+
+* School-Level Early Screening System
+* Teacher Dashboard for creating Assessment
+* Reading Accuracy and Pronunciation Analysis
+* AI-Based Severity Prediction (Normal / Mild / Moderate / Severe)
+* Multi-Stage Dyslexia Screening Framework
+* Risk-Based EEG and MRI Evaluation
+
