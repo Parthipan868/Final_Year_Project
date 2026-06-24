@@ -1,4 +1,4 @@
-**# AI-Driven Multi Stage Dyslexia Screening and Severity Assessment System**
+## AI-Driven Multi Stage Dyslexia Screening and Severity Assessment System
 
 ## Overview
 
@@ -34,32 +34,11 @@ An AI-driven multi-stage dyslexia screening system that:
    * Severe Dyslexia
 
 ---
-
 ## System Workflow
 
-```text
-Reading Assessment Portal
-        ↓
-Speech Recognition
-        ↓
-Feature Extraction
-        ↓
-Risk Classification
-(Low / Medium / High Risk)
-
-        ↓
-
-EEG Analysis
-        ↓
-EEG Feature Extraction
-        ↓
-Severity Classification
-(Normal / Mild / Moderate / Severe)
-
-        ↓
-
-Report Generation
-```
+<p align="center">
+  <img src="assets/workflow.jpeg" alt="System Workflow" width="1200">
+</p>
 
 ---
 
