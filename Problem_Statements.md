@@ -1,68 +1,20 @@
-**Problem Statement 1** : Intelligent Multilingual Layout-Aware OCR System with NLP-Based Error Correction and Document Understanding.
+**## AI-Driven Multi Stage Dyslexia Screening and Severity Assessment System**
 
-**Base Paper** : A Transformer-Based Framework for Scene Text Recognition.
+Dyslexia is one of the most common neurodevelopmental learning disorders, affecting a child's ability to read, spell, write, and process language despite having normal intelligence and educational opportunities. Studies estimate that approximately *5–10% of the global population* is affected by dyslexia, while broader estimates suggest that up to *17–20% of school-age children* may exhibit dyslexic characteristics. Dyslexia accounts for nearly *80–90% of all learning disabilities*, making it a significant educational and social challenge worldwide.
 
-**Limitations** :
+The condition typically emerges during the early years of schooling and is often associated with difficulties in word recognition, reading fluency, spelling, phonological processing, and language comprehension. When dyslexia remains unidentified during childhood, students frequently experience persistent academic struggles, reduced self-confidence, increased anxiety, and lower educational achievement. Early identification and intervention have been shown to significantly improve reading outcomes and long-term academic performance.
 
-• No image enhancement
-• No OCR error correction
-• No multilingual translation
-• No layout-aware output
-• No LLM-ready structured data
+Existing dyslexia detection methods largely rely on psychometric assessments administered by trained specialists or expensive neuroimaging techniques such as Electroencephalography (EEG), Magnetic Resonance Imaging (MRI), Functional Magnetic Resonance Imaging (fMRI), Virtual Reality (VR)-based eye-tracking systems, and other clinical diagnostic procedures. These approaches are often time-consuming, costly, infrastructure-intensive, and difficult to deploy for large-scale screening in schools and rural regions. Furthermore, most existing machine learning and deep learning systems focus only on binary classification (Dyslexic / Non-Dyslexic), providing limited information regarding the severity of the condition. Many systems also depend heavily on brain biomarkers while overlooking actual reading performance indicators such as reading accuracy, pronunciation errors, reading speed, omissions, and response latency, which are critical behavioral signs observed by educators and clinicians.
 
-**Proposed Solutions** :
+Moreover, current research lacks a practical, scalable, and cost-effective multi-stage framework capable of screening large student populations and progressively applying advanced assessments only to high-risk individuals. The absence of severity assessment models further limits the ability of educators and healthcare professionals to design personalized intervention strategies.
 
-• OCR-Oriented Image Enhancement
-• NLP-Based Error Correction
-• Layout-Aware OCR
-• Translation Module
-• Voice Assistance
+Therefore, there is a need for an affordable, AI-driven, multi-stage dyslexia screening and severity assessment system that combines reading-behavior analysis and EEG-based biomarker evaluation to identify children at risk of dyslexia at an early stage. Such a system should provide severity-level predictions (Normal, Mild, Moderate, Severe), reduce dependence on expensive diagnostic procedures, support large-scale school deployment, and enable timely intervention for improved educational outcomes.
 
-
-
-
-**Problem Statement 2** : Smart Civic Issue Reporting and Resolution System using AI-Based Image Classification, Geo-Tagging.
-
-**Base Paper** : Deep Learning Based Pothole Detection and Reporting System.
-
-**Limitations** : 
-
-• Limited to pothole and road-hump detection only
-• No support for other civic issues – garbage, streetlights, water leakage, etc.
-• No citizen-facing complaint submission or tracking interface
-• No duplicate-complaint detection across reports
-
-**Proposed Solutions** :
-
-• Multi-Category Issue Detection (CNN-based image classification)
-• Geo-Tagged Complaint Submission
-• NLP-Based Duplicate Detection & Auto-Categorization
-
-
-
-
-**Problem Statement 3** : AI-Powered Multi-Stage Dyslexia Screening and Severity Assessment System
-
-**Base Papers :**
-
-* Dyslexia Analysis and Diagnosis Based on Eye Movement
-* Multi-Modal Dyslexia Detection Model via SWIN Transformer With Closed-Form Continuous Time Networks
-
-**Limitations :**
-
-* No multi-stage screening framework
-* Mostly binary outputs (Dyslexic / Non-Dyslexic)
-* No dyslexia severity assessment
-* Over-reliance on MRI, fMRI, and EEG (expensive & unaccessible) at early stage 
-* Existing game-based assessments may be affected by non-dyslexia factors such as attention span, distraction and user engagement
-* Limited real-world school-level deployment
-
-**Proposed Solutions :**
-
-* School-Level Early Screening System
-* Teacher Dashboard for creating Assessment
-* Reading Accuracy and Pronunciation Analysis
-* AI-Based Severity Prediction (Normal / Mild / Moderate / Severe)
-* Multi-Stage Dyslexia Screening Framework
-* Risk-Based EEG and MRI Evaluation
-
+* *5–10% of the global population* is affected by dyslexia, with up to *20% of school-age children* showing dyslexic characteristics.
+* Dyslexia accounts for nearly *80–90% of all learning disabilities*, impacting reading, spelling, writing, and language processing.
+* Delayed diagnosis can lead to poor academic performance, low self-confidence, anxiety, and reduced educational opportunities.
+* Current diagnosis primarily relies on *psychometric assessments*, which are time-consuming, subjective, and require trained specialists.
+* Advanced diagnostic methods such as *EEG, MRI, fMRI, VR, and eye-tracking systems* are expensive and not suitable for large-scale school screening.
+* Most existing AI-based systems provide only *binary predictions (Dyslexic / Non-Dyslexic)* and do not assess severity levels.
+* Existing approaches often focus on brain biomarkers while overlooking important reading-behavior indicators such as *reading accuracy, pronunciation errors, reading speed, omissions, and response latency*.
+* There is a need for a *cost-effective, scalable, and multi-stage AI-driven screening system* capable of early dyslexia detection and severity assessment (*Normal, Mild, Moderate, Severe*) for timely intervention.
