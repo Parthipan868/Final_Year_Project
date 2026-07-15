@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AI Dyslexia Screening</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #172033;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 32px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.10);
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .subtitle {
+            color: #526078;
+        }
+
+        .passage {
+            margin: 26px 0;
+            padding: 25px;
+            background: #f1f5f9;
+            border-left: 6px solid #2563eb;
+            border-radius: 10px;
+            font-size: 22px;
+            line-height: 1.8;
+        }
+
+        button {
+            padding: 12px 24px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
+        #startButton {
+            background: #2563eb;
+            color: white;
+        }
+
+        #stopButton {
+            background: #dc2626;
+            color: white;
+        }
+
+        #status {
+            margin-top: 18px;
+            font-weight: bold;
+        }
+
+        .result-card {
+            margin-top: 25px;
+            padding: 22px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .feature {
+            padding: 15px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 9px;
+        }
+
+        .feature span {
+            display: block;
+            margin-bottom: 6px;
+            color: #64748b;
+        }
+
+        .feature strong {
+            font-size: 20px;
+        }
+
+        .risk-box {
+            margin-top: 22px;
+            padding: 18px;
+            border-radius: 10px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .risk-low {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .risk-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .risk-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .probability-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 9px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .recommendation {
+            margin-top: 15px;
+            padding: 16px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 9px;
+            line-height: 1.6;
+        }
+
+        .error {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .disclaimer {
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        @media (max-width: 700px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .passage {
+                font-size: 19px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>AI-Based Oral Reading Assessment</h1>
+
+    <p class="subtitle">
+        Read the passage aloud. The system extracts oral-reading
+        features and predicts Low, Medium, or High dyslexia risk.
+    </p>
+
+    <div class="passage">
+
+        <strong>Read this passage:</strong>
+
+        <br><br>
+
+        <span id="passageText">
+            The little bird sat on a green tree.
+            It looked at the bright blue sky and began to sing.
+        </span>
+
+    </div>
+
+    <button id="startButton">
+        Start Reading
+    </button>
+
+    <button id="stopButton" disabled>
+        Stop
+    </button>
+
+    <p id="status">
+        Ready
+    </p>
+
+    <div id="result"></div>
+
+</div>
+
+
+<script>
+const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+const passageText =
+    document.getElementById("passageText").innerText.trim();
+
+const startButton =
+    document.getElementById("startButton");
+
+const stopButton =
+    document.getElementById("stopButton");
+
+const statusElement =
+    document.getElementById("status");
+
+const resultBox =
+    document.getElementById("result");
+
+let recognition = null;
+let finalTranscript = "";
+let interimTranscript = "";
+let startTime = 0;
+
+let isRecording = false;
+let manuallyStopped = false;
+
+
+function cleanText(text) {
+    return text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s']/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+
+function compareWords(referenceText, spokenText) {
+    const expectedWords = cleanText(referenceText).split(" ");
+    const spokenWords = cleanText(spokenText).split(" ");
+
+    const rows = expectedWords.length + 1;
+    const columns = spokenWords.length + 1;
+
+    const distance = Array.from(
+        { length: rows },
+        () => Array(columns).fill(0)
+    );
+
+    for (let row = 0; row < rows; row++) {
+        distance[row][0] = row;
+    }
+
+    for (let column = 0; column < columns; column++) {
+        distance[0][column] = column;
+    }
+
+    for (let row = 1; row < rows; row++) {
+        for (let column = 1; column < columns; column++) {
+            if (
+                expectedWords[row - 1] ===
+                spokenWords[column - 1]
+            ) {
+                distance[row][column] =
+                    distance[row - 1][column - 1];
+            } else {
+                distance[row][column] =
+                    1 + Math.min(
+                        distance[row - 1][column],
+                        distance[row][column - 1],
+                        distance[row - 1][column - 1]
+                    );
+            }
+        }
+    }
+
+    let row = expectedWords.length;
+    let column = spokenWords.length;
+
+    let correctCount = 0;
+    const omittedWords = [];
+    const substitutedWords = [];
+    const extraWords = [];
+
+    while (row > 0 || column > 0) {
+        if (
+            row > 0 &&
+            column > 0 &&
+            expectedWords[row - 1] ===
+            spokenWords[column - 1]
+        ) {
+            correctCount++;
+            row--;
+            column--;
+        }
+
+        else if (
+            row > 0 &&
+            column > 0 &&
+            distance[row][column] ===
+            distance[row - 1][column - 1] + 1
+        ) {
+            substitutedWords.push({
+                expected: expectedWords[row - 1],
+                spoken: spokenWords[column - 1]
+            });
+
+            row--;
+            column--;
+        }
+
+        else if (
+            row > 0 &&
+            distance[row][column] ===
+            distance[row - 1][column] + 1
+        ) {
+            omittedWords.push(expectedWords[row - 1]);
+            row--;
+        }
+
+        else {
+            extraWords.push(spokenWords[column - 1]);
+            column--;
+        }
+    }
+
+    return {
+        expectedWords,
+        spokenWords,
+        correctCount,
+        omittedWords: omittedWords.reverse(),
+        substitutedWords: substitutedWords.reverse(),
+        extraWords: extraWords.reverse()
+    };
+}
+
+
+function createRecognition() {
+    recognition = new SpeechRecognition();
+
+    recognition.lang = "en-IN";
+
+    // Keep listening continuously.
+    recognition.continuous = true;
+
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+        statusElement.textContent =
+            "Listening... Continue reading until you click Stop.";
+    };
+
+    recognition.onspeechstart = () => {
+        statusElement.textContent =
+            "Speech detected. Continue reading.";
+    };
+
+    recognition.onresult = event => {
+        interimTranscript = "";
+
+        for (
+            let index = event.resultIndex;
+            index < event.results.length;
+            index++
+        ) {
+            const transcript =
+                event.results[index][0].transcript;
+
+            if (event.results[index].isFinal) {
+                finalTranscript += transcript + " ";
+            } else {
+                interimTranscript += transcript;
+            }
+        }
+
+        statusElement.textContent =
+            "Listening: " +
+            finalTranscript +
+            interimTranscript;
+    };
+
+    recognition.onerror = event => {
+        const messages = {
+            "not-allowed":
+                "Microphone permission is blocked.",
+
+            "audio-capture":
+                "The browser cannot access the microphone.",
+
+            "no-speech":
+                "No speech detected yet. Continue reading.",
+
+            "network":
+                "Speech recognition requires an internet connection.",
+
+            "aborted":
+                "Recognition was interrupted."
+        };
+
+        if (event.error === "no-speech" && isRecording) {
+            statusElement.textContent =
+                "Listening... Continue reading.";
+            return;
+        }
+
+        if (event.error === "aborted" && manuallyStopped) {
+            return;
+        }
+
+        statusElement.textContent =
+            messages[event.error] ||
+            "Speech recognition error: " + event.error;
+    };
+
+    recognition.onend = async () => {
+        /*
+         Browsers may end recognition automatically after silence
+         or after an internal time limit.
+
+         If the user has not clicked Stop, restart recognition.
+        */
+        if (isRecording && !manuallyStopped) {
+            statusElement.textContent =
+                "Listening... Continue reading.";
+
+            try {
+                recognition.start();
+            } catch (error) {
+                setTimeout(() => {
+                    if (isRecording && !manuallyStopped) {
+                        try {
+                            recognition.start();
+                        } catch (restartError) {
+                            console.error(restartError);
+                        }
+                    }
+                }, 300);
+            }
+
+            return;
+        }
+
+        startButton.disabled = false;
+        stopButton.disabled = true;
+
+        const spokenText =
+            (finalTranscript + " " + interimTranscript).trim();
+
+        if (!spokenText) {
+            statusElement.textContent =
+                "No speech was captured. Try again.";
+            return;
+        }
+
+        await processAssessment(spokenText);
+    };
+}
+
+
+async function processAssessment(spokenText) {
+    const comparison =
+        compareWords(passageText, spokenText);
+
+    const durationSeconds = Math.max(
+        (Date.now() - startTime) / 1000,
+        1
+    );
+
+    const readingAccuracy =
+        (
+            comparison.correctCount /
+            comparison.expectedWords.length
+        ) * 100;
+
+    const wordOmissionCount =
+        comparison.omittedWords.length;
+
+    const pronunciationErrorCount =
+        comparison.substitutedWords.length;
+
+    const readingSpeedWpm =
+        (
+            comparison.spokenWords.length * 60
+        ) / durationSeconds;
+
+    const featureData = {
+        reading_accuracy:
+            Number(readingAccuracy.toFixed(2)),
+
+        word_omission_count:
+            wordOmissionCount,
+
+        pronunciation_error_count:
+            pronunciationErrorCount,
+
+        reading_speed_wpm:
+            Number(readingSpeedWpm.toFixed(2))
+    };
+
+    statusElement.textContent =
+        "Extracting features and predicting risk...";
+
+    try {
+        const response = await fetch("/predict", {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(featureData)
+        });
+
+        const prediction = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                prediction.error || "Prediction failed."
+            );
+        }
+
+        statusElement.textContent =
+            "Assessment completed.";
+
+        displayResult(
+            spokenText,
+            comparison,
+            featureData,
+            prediction
+        );
+
+    } catch (error) {
+        statusElement.textContent =
+            "Prediction failed.";
+
+        resultBox.innerHTML = `
+            <div class="error">
+                ${error.message}
+            </div>
+        `;
+    }
+}
+
+
+function displayResult(
+    spokenText,
+    comparison,
+    features,
+    prediction
+) {
+    const riskClass =
+        prediction.risk_label.toLowerCase();
+
+    const omittedText =
+        comparison.omittedWords.length
+            ? comparison.omittedWords.join(", ")
+            : "None";
+
+    const substitutionsText =
+        comparison.substitutedWords.length
+            ? comparison.substitutedWords
+                .map(
+                    item =>
+                        `${item.expected} → ${item.spoken}`
+                )
+                .join(", ")
+            : "None";
+
+    const extraText =
+        comparison.extraWords.length
+            ? comparison.extraWords.join(", ")
+            : "None";
+
+    const probabilityRows =
+        Object.entries(prediction.probabilities)
+            .map(
+                ([label, probability]) => `
+                    <div class="probability-row">
+                        <span>${label}</span>
+                        <strong>${probability}%</strong>
+                    </div>
+                `
+            )
+            .join("");
+
+    resultBox.innerHTML = `
+        <div class="result-card">
+
+            <h2>Assessment Result</h2>
+
+            <div class="risk-box risk-${riskClass}">
+                Predicted Dyslexia Risk:
+                ${prediction.risk_label}
+            </div>
+
+            <h3>Recognized Speech</h3>
+            <p>${spokenText}</p>
+
+            <h3>Extracted Features</h3>
+
+            <div class="feature-grid">
+
+                <div class="feature">
+                    <span>Reading Accuracy</span>
+                    <strong>
+                        ${features.reading_accuracy}%
+                    </strong>
+                </div>
+
+                <div class="feature">
+                    <span>Word Omission Count</span>
+                    <strong>
+                        ${features.word_omission_count}
+                    </strong>
+                </div>
+
+                <div class="feature">
+                    <span>Pronunciation/Misread Count</span>
+                    <strong>
+                        ${features.pronunciation_error_count}
+                    </strong>
+                </div>
+
+                <div class="feature">
+                    <span>Reading Speed</span>
+                    <strong>
+                        ${features.reading_speed_wpm} WPM
+                    </strong>
+                </div>
+
+            </div>
+
+            <h3>Word Comparison</h3>
+
+            <p>
+                <strong>Omitted words:</strong>
+                ${omittedText}
+            </p>
+
+            <p>
+                <strong>Substituted words:</strong>
+                ${substitutionsText}
+            </p>
+
+            <p>
+                <strong>Extra words:</strong>
+                ${extraText}
+            </p>
+
+            <h3>Prediction Probabilities</h3>
+
+            ${probabilityRows}
+
+            <h3>Recommendation</h3>
+
+            <div class="recommendation">
+                ${prediction.recommendation}
+            </div>
+
+            <p class="disclaimer">
+                This is an early screening system and does not
+                provide a clinical diagnosis.
+            </p>
+
+        </div>
+    `;
+}
+
+
+if (!SpeechRecognition) {
+    statusElement.textContent =
+        "Speech recognition is unsupported. Use Google Chrome.";
+
+    startButton.disabled = true;
+} else {
+
+    startButton.onclick = () => {
+        finalTranscript = "";
+        interimTranscript = "";
+
+        manuallyStopped = false;
+        isRecording = true;
+
+        resultBox.innerHTML = "";
+        startTime = Date.now();
+
+        createRecognition();
+
+        startButton.disabled = true;
+        stopButton.disabled = false;
+
+        try {
+            recognition.start();
+        } catch (error) {
+            isRecording = false;
+
+            statusElement.textContent =
+                "Could not start recognition: " +
+                error.message;
+
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        }
+    };
+
+    stopButton.onclick = () => {
+        manuallyStopped = true;
+        isRecording = false;
+
+        stopButton.disabled = true;
+
+        statusElement.textContent =
+            "Finishing speech recognition...";
+
+        if (recognition) {
+            recognition.stop();
+        }
+    };
+}
+</script>
+
+</body>
+</html>
