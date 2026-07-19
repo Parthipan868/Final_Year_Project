@@ -163,6 +163,50 @@
             font-size: 13px;
         }
 
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            margin-bottom: 5px;
+            padding: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .page-indicator {
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            background: #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .page-nav-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 8px;
+        }
+
+        .page-nav-btn:hover:not(:disabled) {
+            background: #1d4ed8;
+        }
+
+        .page-nav-btn:disabled {
+            background: #cbd5e1;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
         @media (max-width: 700px) {
             .feature-grid {
                 grid-template-columns: 1fr;
@@ -185,6 +229,14 @@
         Read the passage aloud. The system extracts oral-reading
         features and predicts Low, Medium, or High dyslexia risk.
     </p>
+
+    <div class="pagination-container">
+        <span id="pageIndicator" class="page-indicator">Passage 1 of 2</span>
+        <div>
+            <button id="prevBtn" class="page-nav-btn" disabled>&#8592; Previous Page</button>
+            <button id="nextBtn" class="page-nav-btn" style="display: none;">Next Page &#8594;</button>
+        </div>
+    </div>
 
     <div class="passage">
 
@@ -220,8 +272,69 @@
 const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
 
-const passageText =
-    document.getElementById("passageText").innerText.trim();
+const passages = [
+    "The little bird sat on a green tree. It looked at the bright blue sky and began to sing.",
+    "The brown bird quickly flew through the bright blue bridge before breakfast"
+];
+let currentPageIndex = 0;
+const completedPages = new Array(passages.length).fill(false);
+
+function getPassageText() {
+    return passages[currentPageIndex];
+}
+
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const pageIndicator = document.getElementById("pageIndicator");
+const passageTextElement = document.getElementById("passageText");
+
+function updateNextButtonVisibility() {
+    if (currentPageIndex < passages.length - 1 && completedPages[currentPageIndex]) {
+        nextBtn.style.display = "inline-block";
+        nextBtn.disabled = false;
+    } else {
+        nextBtn.style.display = "none";
+    }
+}
+
+function updatePage() {
+    passageTextElement.innerText = passages[currentPageIndex];
+    pageIndicator.textContent = `Passage ${currentPageIndex + 1} of ${passages.length}`;
+
+    prevBtn.disabled = currentPageIndex === 0;
+    updateNextButtonVisibility();
+
+    statusElement.textContent = "Ready";
+    resultBox.innerHTML = "";
+    finalTranscript = "";
+    interimTranscript = "";
+}
+
+function toggleNavigation(enabled) {
+    if (enabled) {
+        prevBtn.disabled = currentPageIndex === 0;
+        if (currentPageIndex < passages.length - 1 && completedPages[currentPageIndex]) {
+            nextBtn.disabled = false;
+        }
+    } else {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+    }
+}
+
+prevBtn.onclick = () => {
+    if (currentPageIndex > 0) {
+        currentPageIndex--;
+        updatePage();
+    }
+};
+
+nextBtn.onclick = () => {
+    if (currentPageIndex < passages.length - 1) {
+        currentPageIndex++;
+        updatePage();
+    }
+};
 
 const startButton =
     document.getElementById("startButton");
@@ -461,6 +574,7 @@ function createRecognition() {
 
         startButton.disabled = false;
         stopButton.disabled = true;
+        toggleNavigation(true);
 
         const spokenText =
             (finalTranscript + " " + interimTranscript).trim();
@@ -478,7 +592,7 @@ function createRecognition() {
 
 async function processAssessment(spokenText) {
     const comparison =
-        compareWords(passageText, spokenText);
+        compareWords(getPassageText(), spokenText);
 
     const durationSeconds = Math.max(
         (Date.now() - startTime) / 1000,
@@ -547,6 +661,9 @@ async function processAssessment(spokenText) {
             featureData,
             prediction
         );
+
+        completedPages[currentPageIndex] = true;
+        updateNextButtonVisibility();
 
     } catch (error) {
         statusElement.textContent =
@@ -707,6 +824,7 @@ if (!SpeechRecognition) {
 
         startButton.disabled = true;
         stopButton.disabled = false;
+        toggleNavigation(false);
 
         try {
             recognition.start();
@@ -719,6 +837,7 @@ if (!SpeechRecognition) {
 
             startButton.disabled = false;
             stopButton.disabled = true;
+            toggleNavigation(true);
         }
     };
 
@@ -736,6 +855,9 @@ if (!SpeechRecognition) {
         }
     };
 }
+
+// Initialize pagination display setup
+updatePage();
 </script>
 
 </body>
