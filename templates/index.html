@@ -316,9 +316,7 @@ function updatePage() {
 function toggleNavigation(enabled) {
     if (enabled) {
         prevBtn.disabled = currentPageIndex === 0;
-        if (currentPageIndex < passages.length - 1 && completedPages[currentPageIndex]) {
-            nextBtn.disabled = false;
-        }
+        nextBtn.disabled = !(currentPageIndex < passages.length - 1 && completedPages[currentPageIndex]);
     } else {
         prevBtn.disabled = true;
         nextBtn.disabled = true;
